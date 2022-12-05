@@ -1,10 +1,12 @@
 import { Shopify } from "@shopify/shopify-api";
+import { Application } from "express";
 import ensureBilling, {
   ShopifyBillingError,
 } from "../helpers/ensure-billing.js";
 import redirectToAuth from "../helpers/redirect-to-auth.js";
 
 import returnTopLevelRedirection from "../helpers/return-top-level-redirection.js";
+import { BillingSettingsType } from "../index.js";
 
 const TEST_GRAPHQL_QUERY = `
 {
@@ -14,14 +16,14 @@ const TEST_GRAPHQL_QUERY = `
 }`;
 
 export default function verifyRequest(
-  app,
-  { billing = { required: false } } = { billing: { required: false } }
+  app: Application,
+  { billing = { required: false } }: { billing: BillingSettingsType },
 ) {
-  return async (req, res, next) => {
+  return async (req: any, res: any, next: () => any) => {
     const session = await Shopify.Utils.loadCurrentSession(
       req,
       res,
-      app.get("use-online-tokens")
+      app.get("use-online-tokens"),
     );
 
     let shop = Shopify.Utils.sanitizeShop(req.query.shop);
@@ -36,7 +38,7 @@ export default function verifyRequest(
           // The request to check billing status serves to validate that the access token is still valid.
           const [hasPayment, confirmationUrl] = await ensureBilling(
             session,
-            billing
+            billing,
           );
 
           if (!hasPayment) {
@@ -47,7 +49,7 @@ export default function verifyRequest(
           // Make a request to ensure the access token is still valid. Otherwise, re-authenticate the user.
           const client = new Shopify.Clients.Graphql(
             session.shop,
-            session.accessToken
+            session.accessToken,
           );
           await client.query({ data: TEST_GRAPHQL_QUERY });
         }
@@ -59,7 +61,7 @@ export default function verifyRequest(
         ) {
           // Re-authenticate if we get a 401 response
         } else if (e instanceof ShopifyBillingError) {
-          console.error(e.message, e.errorData[0]);
+          console.error(e.message, (e as ShopifyBillingError).errorData[0]);
           res.status(500).end();
           return;
         } else {
@@ -81,11 +83,11 @@ export default function verifyRequest(
         }
       }
     }
-
+    if (!shop) throw new Error("No shop query parameter provided");
     returnTopLevelRedirection(
       req,
       res,
-      `/api/auth?shop=${encodeURIComponent(shop)}`
+      `/api/auth?shop=${encodeURIComponent(shop)}`,
     );
   };
 }

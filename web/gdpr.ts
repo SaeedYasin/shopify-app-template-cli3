@@ -1,6 +1,6 @@
-import { Shopify } from "@shopify/shopify-api";
+import { Shopify, WebhookRegistryEntry } from "@shopify/shopify-api";
 
-export function setupGDPRWebHooks(path) {
+export function setupGDPRWebHooks(path: WebhookRegistryEntry["path"]) {
   /**
    * Customers can request their data from a store owner. When this happens,
    * Shopify invokes this webhook.

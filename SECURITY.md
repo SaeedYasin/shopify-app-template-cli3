@@ -56,4 +56,4 @@ We look forward to working with all security researchers and strive to be respec
 
 ## Receiving Security Updates
 
-To receive all general updates to vulnerabilities, please subscribe to our hackerone [Hacktivity](https://hackerone.com/shopify/hacktivity)
+To recieve all general updates to vulnerabilities, please subscribe to our hackerone [Hacktivity](https://hackerone.com/shopify/hacktivity)
